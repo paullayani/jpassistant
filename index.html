@@ -980,8 +980,8 @@ input[type=range]::-moz-range-thumb{
   cursor:pointer;
 }
 .ph-cta:active{background:rgba(26,61,124,.07)}
-.ph-cta-static{color:rgba(26,61,124,.45);border-color:rgba(26,61,124,.12);cursor:default}
-.r-voir-btn{
+.ph-info{font-size:.68rem;color:rgba(26,61,124,.55);margin-bottom:6px}
+.r-contact-btn{
   display:inline-flex;
   align-items:center;
   gap:5px;
@@ -997,7 +997,7 @@ input[type=range]::-moz-range-thumb{
   text-decoration:none;
   touch-action:manipulation;
 }
-.r-voir-btn:active{background:rgba(26,61,124,.07)}
+.r-contact-btn:active{background:rgba(26,61,124,.07)}
 
 /* Top badge and availability */
 .r-badge{
@@ -3573,79 +3573,8 @@ function getFrameExplanation(faceShape, frameShape){
 }
 
 /* ═════════ IMAGES PRODUITS ═════════ */
-/* Extrait la référence modèle propre (sans préfixe ni taille) */
-function getModelRef(nom) {
-  var s = (nom || '').replace(/^[A-Z]{2,5}\s+/, '').trim();
-  var parts = [];
-  s.split(/\s+/).every(function(t) {
-    if (/^\d{2}$/.test(t)) return false; /* arrêt sur les tailles 2 chiffres (49, 22…) */
-    parts.push(t);
-    return true;
-  });
-  return parts.join(' ');
-}
-
-/* Sites officiels des marques — aucun concurrent, aucun prix externe */
-var BRAND_SEARCH = {
-  'saint laurent':    'https://www.ysl.com/fr-fr/search?q=',
-  'gucci':            'https://www.gucci.com/fr/fr/search?q=',
-  'fendi':            'https://www.fendi.com/fr/search?q=',
-  'celine':           'https://www.celine.com/fr-fr/search?q=',
-  'bottega veneta':   'https://www.bottegaveneta.com/fr-fr/search?q=',
-  'loewe':            'https://www.loewe.com/fra/fr/search?q=',
-  'balenciaga':       'https://www.balenciaga.com/fr-fr/search?q=',
-  'versace':          'https://www.versace.com/fr/fr-fr/search?q=',
-  'versace junior':   'https://www.versace.com/fr/fr-fr/search?q=',
-  'prada optique':    'https://www.prada.com/fr/fr/search.html?search=',
-  'prada solaire':    'https://www.prada.com/fr/fr/search.html?search=',
-  'miu miu':          'https://www.miumiu.com/fr/fr/search?q=',
-  'dior':             'https://www.dior.com/fr_fr/fashion/search?q=',
-  'christian dior homme': 'https://www.dior.com/fr_fr/fashion/search?q=',
-  'dior man':         'https://www.dior.com/fr_fr/fashion/search?q=',
-  'dior woman':       'https://www.dior.com/fr_fr/fashion/search?q=',
-  'chloé':            'https://www.chloe.com/fr/search?q=',
-  'givenchy':         'https://www.givenchy.com/fr/fr/search?q=',
-  'cartier':          'https://www.cartier.com/fr-fr/search?q=',
-  'bulgari':          'https://www.bulgari.com/fr-fr/search?q=',
-  'burberry':         'https://fr.burberry.com/search/?q=',
-  'dolce e gabbana':  'https://www.dolcegabbana.com/fr/search?q=',
-  'tom ford':         'https://www.tomford.com/search?q=',
-  'hugo boss':        'https://www.hugoboss.com/fr/search?q=',
-  'hugo':             'https://www.hugoboss.com/fr/search?q=',
-  'boss':             'https://www.hugoboss.com/fr/search?q=',
-  'montblanc':        'https://www.montblanc.com/fr-fr/search?q=',
-  'marc jacobs':      'https://www.marcjacobs.com/search?q=',
-  'kenzo':            'https://www.kenzo.com/fr-fr/search?q=',
-  'isabel marant':    'https://www.isabelmarant.com/fr-fr/search?q=',
-  'stella mccartney': 'https://www.stellamccartney.com/fr/fr/search?q=',
-  'victoria beckham': 'https://www.victoriabeckham.com/search?q=',
-  'chopard':          'https://www.chopard.com/fr-fr/search?q=',
-  'fred':             'https://www.fred.com/fr-fr/search?q=',
-  'dita':             'https://www.ditaglasses.com/search?q=',
-  'moscot':           'https://www.moscot.com/search?type=product&q=',
-  'mykita':           'https://mykita.com/fr/search?q=',
-  'lindberg':         'https://lindberg.com/search?q=',
-  'oakley':           'https://www.oakley.com/fr-FR/search?q=',
-  'persol':           'https://www.persol.com/fr-FR/search?q=',
-  'ahlem':            'https://ahlemeyewear.com/search?q=',
-  'john dalia':       'https://www.johndalia.com/search?q=',
-  'ray-ban':          'https://www.ray-ban.com/france/search?q=',
-  'ray-ban junior':   'https://www.ray-ban.com/france/search?q=',
-  'david beckham':    'https://db-eyewear.com/search?q=',
-  'lesca':            'https://lesca-lunetier.com/search?q=',
-  '9five':            'https://www.9five.com/search?q=',
-  'tag heuer':        'https://www.tagheuer.com/fr-fr/search?q=',
-  'thom brown':       'https://thombrowne.com/search?q=',
-  'paul smith':       'https://www.paulsmith.com/fr-fr/search?q=',
-  'carrera':          'https://www.carreraway.com/search?q=',
-  'dsquared2':        'https://www.dsquared2.com/fr/search?q=',
-  'cazal eyewear':    'https://www.cazal-eyewear.com/search?q=',
-  'cutler and gross': 'https://www.cutlerandgross.com/search?q=',
-  'retrosuperfutur':  'https://www.retrosuperfuture.com/search?q=',
-  'eyepetizer':       'https://www.eyepetizer.net/search?q='
-};
-
-/* URL image CDN (Ray-Ban) ou '' si indisponible */
+/* Ray-Ban uniquement : tente de charger la photo depuis le CDN officiel.
+   Toutes les autres marques : pas de photo automatique.                  */
 function getProductImg(r) {
   if (r.image) return r.image;
   var brand = (r.marque || '').toLowerCase().trim();
@@ -3660,22 +3589,13 @@ function getProductImg(r) {
   return '';
 }
 
-/* Lien vers le site officiel de la marque, ou '' */
-function getBrandLink(r) {
-  var base = BRAND_SEARCH[(r.marque || '').toLowerCase().trim()];
-  var ref  = getModelRef(r.nom);
-  return (base && ref) ? base + encodeURIComponent(ref) : '';
-}
-
 /* ═════════ PLACEHOLDER PRODUIT ═════════ */
 function productPlaceholder(marque, nom) {
-  var link = getBrandLink({marque: marque, nom: nom});
   return '<div class="ph-box">' +
     '<div class="ph-brand-big">' + marque + '</div>' +
     '<div class="ph-model">' + nom + '</div>' +
-    (link
-      ? '<a href="' + link + '" target="_blank" rel="noopener" class="ph-cta">Voir sur le site officiel</a>'
-      : '<span class="ph-cta ph-cta-static">Photo disponible en magasin</span>') +
+    '<div class="ph-info">Photo disponible en magasin</div>' +
+    '<a href="tel:+33140370660" class="ph-cta">📞 Demander une photo</a>' +
   '</div>';
 }
 
@@ -4228,20 +4148,17 @@ function renderResults(recos){
     }
 
     /* Image : photo CDN si disponible (Ray-Ban), sinon placeholder sobre */
-    var imgUrl    = getProductImg(r);
-    var brandLink = getBrandLink(r);
+    var imgUrl = getProductImg(r);
     var imageHtml;
     if (imgUrl) {
-      var fallbackBtn = brandLink
-        ? '<a href="' + brandLink + '" target="_blank" rel="noopener" class="ph-cta">Voir sur le site officiel</a>'
-        : '<span class="ph-cta ph-cta-static">Photo disponible en magasin</span>';
       imageHtml =
         '<img src="' + imgUrl + '" alt="' + r.marque + ' ' + r.nom + '" loading="lazy" ' +
           'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
         '<div class="ph-box" style="display:none">' +
           '<div class="ph-brand-big">' + r.marque + '</div>' +
           '<div class="ph-model">' + r.nom + '</div>' +
-          fallbackBtn +
+          '<div class="ph-info">Photo disponible en magasin</div>' +
+          '<a href="tel:+33140370660" class="ph-cta">📞 Demander une photo</a>' +
         '</div>';
     } else {
       imageHtml = productPlaceholder(r.marque, r.nom);
@@ -4260,7 +4177,7 @@ function renderResults(recos){
           '<div class="r-meta">' + r.marque + ' · ' + r.forme + '</div>' +
           (C.faceShape ? '<div class="r-explain">' + getFrameExplanation(C.faceShape, r.forme) + '</div>' : '') +
           '<div class="r-price">' + r.prix + ' €</div>' +
-          (brandLink ? '<a href="' + brandLink + '" target="_blank" rel="noopener" class="r-voir-btn">Voir sur le site officiel →</a>' : '') +
+          '<a href="tel:+33140370660" class="r-contact-btn">📞 Réserver / demander une photo</a>' +
         '</div>' +
       '</div>';
   });
