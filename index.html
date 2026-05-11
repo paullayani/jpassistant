@@ -799,7 +799,7 @@ input[type=range]::-moz-range-thumb{
   justify-content:center;
   padding:28px;
 }
-.r-img img{
+.r-img img,.r-prod-img{
   max-width:90%;
   max-height:90%;
   object-fit:contain;
@@ -808,47 +808,8 @@ input[type=range]::-moz-range-thumb{
   position:relative;
   z-index:1;
 }
-.r-card:active .r-img img{transform:scale(1.02)}
+.r-card:active .r-img img,.r-card:active .r-prod-img{transform:scale(1.02)}
 
-/* Placeholder sobre quand pas de photo */
-.ph-box{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  padding:24px 20px;
-  text-align:center;
-  width:100%;
-}
-.ph-brand-big{
-  font-family:'Playfair Display',serif;
-  font-size:1.6rem;
-  font-weight:500;
-  color:#3a352e;
-  letter-spacing:.02em;
-}
-.ph-model{
-  font-size:.72rem;
-  color:#8a8580;
-  font-weight:400;
-  letter-spacing:.03em;
-  max-width:90%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.ph-cta{
-  margin-top:8px;
-  font-size:.65rem;
-  font-weight:600;
-  color:#1A3D7C;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  padding:6px 16px;
-  border:1px solid rgba(26,61,124,.2);
-  border-radius:999px;
-}
 
 /* Top badge and availability */
 .r-badge{
@@ -3393,14 +3354,17 @@ function getFrameExplanation(faceShape, frameShape){
   return explanations[key] || 'Cette monture a été sélectionnée pour sa compatibilité avec votre morphologie.';
 }
 
-/* ═════════ PLACEHOLDER PRODUIT ═════════ */
-function productPlaceholder(marque, nom){
-  return '<div class="ph-box">' +
-    '<div class="ph-brand-big">' + marque + '</div>' +
-    '<div class="ph-model">' + nom + '</div>' +
-    '<div class="ph-cta">Voir en magasin</div>' +
-  '</div>';
-}
+/* ═════════ IMAGES PRODUITS ═════════ */
+var STYLE_IMG = {
+  luxe:      'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=600&q=80',
+  classique: 'https://images.unsplash.com/photo-1574258495973-c94ede22f4e4?auto=format&fit=crop&w=600&q=80',
+  tendance:  'https://images.unsplash.com/photo-1511499767150-a7a1337f05ef?auto=format&fit=crop&w=600&q=80',
+  sport:     'https://images.unsplash.com/photo-1508296695146-257a814070b4?auto=format&fit=crop&w=600&q=80',
+  audacieux: 'https://images.unsplash.com/photo-1529429017-0d39b67cbf2a?auto=format&fit=crop&w=600&q=80',
+  discret:   'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=600&q=80'
+};
+var IMG_FALLBACK = 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=600&q=80';
+function getProductImg(r){ return r.image || STYLE_IMG[r.style] || IMG_FALLBACK; }
 
 /* ═════════ NAVIGATION ═════════ */
 function goTo(n){
@@ -3950,27 +3914,13 @@ function renderResults(recos){
       badge = '<span class="r-badge match">Adapté à votre visage</span>';
     }
 
-    /* Image : affiche la photo si URL renseignée, sinon placeholder sobre */
-    var imageHtml;
-    if(r.image){
-      imageHtml =
-        '<img src="' + r.image + '" alt="' + r.marque + ' ' + r.nom + '" ' +
-          'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
-        '<div class="ph-box" style="display:none">' +
-          '<div class="ph-icon">👓</div>' +
-          '<div class="ph-brand">' + r.marque + '</div>' +
-          '<div class="ph-text">Photo disponible en magasin</div>' +
-        '</div>';
-    } else {
-      imageHtml = productPlaceholder(r.marque, r.nom);
-    }
-
+    var imgUrl = getProductImg(r);
     html +=
       '<div class="r-card ' + (isTop ? 'top' : '') + '">' +
         '<div class="r-img">' +
           badge +
           '<span class="r-avail"><span class="avail-dot"></span>Disponible en magasin</span>' +
-          imageHtml +
+          '<img src="' + imgUrl + '" alt="' + r.marque + '" onerror="this.src=\'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=600&q=80\'"> ' +
         '</div>' +
         '<div class="r-body">' +
           '<div class="r-brand">' + r.marque + '</div>' +
