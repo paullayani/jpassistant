@@ -975,7 +975,28 @@ input[type=range]::-moz-range-thumb{
   padding:6px 16px;
   border:1px solid rgba(26,61,124,.2);
   border-radius:999px;
+  text-decoration:none;
+  display:inline-block;
+  cursor:pointer;
 }
+.ph-cta:active{background:rgba(26,61,124,.07)}
+.r-voir-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  margin-top:12px;
+  font-size:.63rem;
+  font-weight:600;
+  color:#1A3D7C;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  padding:6px 14px;
+  border:1px solid rgba(26,61,124,.22);
+  border-radius:999px;
+  text-decoration:none;
+  touch-action:manipulation;
+}
+.r-voir-btn:active{background:rgba(26,61,124,.07)}
 
 /* Top badge and availability */
 .r-badge{
@@ -3551,28 +3572,17 @@ function getFrameExplanation(faceShape, frameShape){
 }
 
 /* ═════════ IMAGES PRODUITS ═════════ */
-/* Construit l'URL de la vraie photo produit depuis le CDN de la marque.
-   Pour Ray-Ban : assets.ray-ban.com (pattern 0MODEL__COLOR__P21)
-   Pour les autres marques : retourne '' → affiche le placeholder texte   */
+/* Construit l'URL Google Images pour chercher la vraie photo de la monture */
+function searchUrl(marque, nom) {
+  /* Nettoie le préfixe 2-5 lettres majuscules (GUCC, SAIN, BOTT…) */
+  var ref = (nom || '').replace(/^[A-Z]{2,5}\s+/, '').split(/\s+/).slice(0, 3).join(' ');
+  var q   = marque + ' ' + ref + ' lunettes';
+  return 'https://www.google.com/search?q=' + encodeURIComponent(q) + '&tbm=isch';
+}
+
+/* Retourne l'URL de la photo si le champ image est renseigné, sinon vide */
 function getProductImg(r) {
-  if (r.image) return r.image;
-
-  var nom   = (r.nom   || '').trim();
-  var brand = (r.marque|| '').toLowerCase().replace(/[-\s]+/g, '');
-
-  /* ── Ray-Ban (optic, sun, junior) ─────────────────── */
-  if (brand === 'rayban' || brand === 'raybanjunior') {
-    /* Format nom : "RX7185 2000 52 18"  |  "RB4171 865/13 54 18" */
-    var m = nom.match(/^(R[XBY]\d+[A-Z]?)\s+([0-9]+(?:\/[0-9]+)?(?:-[A-Z]+)?)/);
-    if (m) {
-      var color = m[2].replace('/', '-');
-      return 'https://assets.ray-ban.com/cdn-cgi/image/format=auto,width=600' +
-             '/https://assets.ray-ban.com/static/media/eyeglasses/0' +
-             m[1] + '__' + color + '__P21.jpg';
-    }
-  }
-
-  return ''; /* Pas de photo → placeholder sobre */
+  return r.image || '';
 }
 
 /* ═════════ PLACEHOLDER PRODUIT ═════════ */
@@ -3580,7 +3590,7 @@ function productPlaceholder(marque, nom){
   return '<div class="ph-box">' +
     '<div class="ph-brand-big">' + marque + '</div>' +
     '<div class="ph-model">' + nom + '</div>' +
-    '<div class="ph-cta">Voir en magasin</div>' +
+    '<a href="' + searchUrl(marque, nom) + '" target="_blank" rel="noopener" class="ph-cta">Voir la monture</a>' +
   '</div>';
 }
 
@@ -4132,8 +4142,8 @@ function renderResults(recos){
       badge = '<span class="r-badge match">Adapté à votre visage</span>';
     }
 
-    /* Image : cherche la vraie photo produit (CDN marque ou champ image),
-       sinon affiche le placeholder sobre avec marque + référence */
+    /* Image : affiche la photo si le champ image est renseigné,
+       sinon placeholder sobre marque + référence + lien Google Images */
     var imgUrl = getProductImg(r);
     var imageHtml;
     if(imgUrl){
@@ -4143,7 +4153,7 @@ function renderResults(recos){
         '<div class="ph-box" style="display:none">' +
           '<div class="ph-brand-big">' + r.marque + '</div>' +
           '<div class="ph-model">' + r.nom + '</div>' +
-          '<div class="ph-cta">Voir en magasin</div>' +
+          '<a href="' + searchUrl(r.marque, r.nom) + '" target="_blank" rel="noopener" class="ph-cta">Voir la monture</a>' +
         '</div>';
     } else {
       imageHtml = productPlaceholder(r.marque, r.nom);
@@ -4162,6 +4172,7 @@ function renderResults(recos){
           '<div class="r-meta">' + r.marque + ' · ' + r.forme + '</div>' +
           (C.faceShape ? '<div class="r-explain">' + getFrameExplanation(C.faceShape, r.forme) + '</div>' : '') +
           '<div class="r-price">' + r.prix + ' €</div>' +
+          '<a href="' + searchUrl(r.marque, r.nom) + '" target="_blank" rel="noopener" class="r-voir-btn">Voir la monture →</a>' +
         '</div>' +
       '</div>';
   });
