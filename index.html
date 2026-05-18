@@ -811,6 +811,83 @@ a.hero-info-line:active{color:var(--text)}
   letter-spacing:.02em;
 }
 
+/* ═══ QUESTIONNAIRE ═══ */
+.q-progress{display:flex;gap:8px;margin-bottom:28px;align-items:center}
+.q-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all .3s}
+.q-dot.active{background:var(--gold);transform:scale(1.25)}
+.q-dot.done{background:var(--gold3)}
+.q-block{display:none;animation:qFadeIn .3s ease}
+.q-block.active{display:block}
+@keyframes qFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.q-label{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.15rem;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:18px;
+  line-height:1.4;
+  letter-spacing:.01em;
+}
+.q-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.q-btn{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:14px 18px;
+  color:var(--text2);
+  font-size:.875rem;
+  letter-spacing:.02em;
+  cursor:pointer;
+  text-align:left;
+  transition:all .2s cubic-bezier(.22,1,.36,1);
+  touch-action:manipulation;
+  line-height:1.45;
+  width:100%;
+}
+.q-btn:hover{border-color:rgba(200,171,114,.4);color:var(--text)}
+.q-btn.on{border-color:var(--gold);color:var(--text);background:rgba(200,171,114,.06)}
+.q-btn strong{display:block;font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:3px}
+.q-btn.on strong{color:var(--gold)}
+.q-hint{font-size:.7rem;color:var(--text3);letter-spacing:.02em}
+
+/* Scan / questionnaire result panel */
+.scan-confirm{
+  display:none;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:28px 20px;
+  margin:20px 0;
+  text-align:center;
+  animation:qFadeIn .4s ease;
+}
+.scan-confirm.show{display:block}
+.sc-eyebrow{
+  font-size:.68rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--gold3);
+  margin-bottom:8px;
+}
+.sc-shape{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2rem;
+  font-weight:700;
+  color:var(--gold);
+  margin:4px 0 10px;
+  line-height:1;
+}
+.sc-desc{
+  font-size:.8rem;
+  color:var(--text2);
+  line-height:1.6;
+  margin-bottom:22px;
+  max-width:320px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.sc-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
 /* ═══ STYLE CHIPS ═══ */
 .chips{
   display:flex;
@@ -1576,14 +1653,89 @@ input[type=range]::-moz-range-thumb{
       <span class="dot"></span>
       <span id="camText">Activation de la caméra…</span>
     </div>
-    <button class="btn btn-gold" id="camNext" onclick="confirmFace()" disabled>Continuer</button>
+    <div class="scan-confirm" id="scanConfirm">
+      <div class="sc-eyebrow">Analyse terminée</div>
+      <div class="sc-shape" id="scShape">—</div>
+      <div class="sc-desc" id="scDesc">—</div>
+      <div class="sc-actions">
+        <button class="btn btn-gold" onclick="confirmFaceScan()">Confirmer</button>
+        <button class="btn btn-outline" onclick="adjustFaceScan()">Ajuster</button>
+      </div>
+    </div>
+    <button class="btn btn-gold" id="camNext" onclick="confirmFace()" disabled style="display:none">Continuer</button>
     <button class="btn btn-outline" onclick="showManual()">Choisir manuellement</button>
   </div>
 
   <div id="manualView" style="display:none">
-    <div class="face-grid" id="faceGrid"></div>
-    <button class="btn btn-gold" id="manualNext" onclick="goTo(3)" disabled>Continuer</button>
-    <button class="btn btn-outline" onclick="skipFace()">Passer cette étape</button>
+    <div id="questionnaireView">
+      <div class="q-progress">
+        <div class="q-dot active" id="qd1"></div>
+        <div class="q-dot" id="qd2"></div>
+        <div class="q-dot" id="qd3"></div>
+      </div>
+
+      <div class="q-block active" id="qBlock1">
+        <div class="q-label">La proportion de votre visage est plutôt…</div>
+        <div class="q-options">
+          <button class="q-btn" data-q="1" data-v="a" onclick="selectQ(this)">
+            <strong>Aussi large que long</strong>
+            <span class="q-hint">Mon visage semble presque aussi large que haut</span>
+          </button>
+          <button class="q-btn" data-q="1" data-v="b" onclick="selectQ(this)">
+            <strong>Nettement plus long que large</strong>
+            <span class="q-hint">Mon visage est allongé, plutôt étroit</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="q-block" id="qBlock2">
+        <div class="q-label">La structure de votre mâchoire est…</div>
+        <div class="q-options">
+          <button class="q-btn" data-q="2" data-v="a" onclick="selectQ(this)">
+            <strong>Douce et arrondie</strong>
+            <span class="q-hint">Les angles sont peu marqués, les contours souples</span>
+          </button>
+          <button class="q-btn" data-q="2" data-v="b" onclick="selectQ(this)">
+            <strong>Angulaire et marquée</strong>
+            <span class="q-hint">La mâchoire est nette, les angles bien visibles</span>
+          </button>
+          <button class="q-btn" data-q="2" data-v="c" onclick="selectQ(this)">
+            <strong>Fine et discrète</strong>
+            <span class="q-hint">La mâchoire est peu prononcée, le menton discret</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="q-block" id="qBlock3">
+        <div class="q-label">En comparant front et mâchoire…</div>
+        <div class="q-options">
+          <button class="q-btn" data-q="3" data-v="a" onclick="selectQ(this)">
+            <strong>Mon front est plus large</strong>
+            <span class="q-hint">Le visage se rétrécit vers le menton (forme en V)</span>
+          </button>
+          <button class="q-btn" data-q="3" data-v="b" onclick="selectQ(this)">
+            <strong>Ma mâchoire est plus large</strong>
+            <span class="q-hint">Le visage s'élargit vers le bas, la mâchoire domine</span>
+          </button>
+          <button class="q-btn" data-q="3" data-v="c" onclick="selectQ(this)">
+            <strong>Front et mâchoire similaires</strong>
+            <span class="q-hint">Les largeurs sont équilibrées de haut en bas</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scan-confirm" id="qResultPanel">
+      <div class="sc-eyebrow">Votre morphologie</div>
+      <div class="sc-shape" id="qrShape">—</div>
+      <div class="sc-desc" id="qrDesc">—</div>
+      <div class="sc-actions">
+        <button class="btn btn-gold" onclick="goTo(3)">Voir mes recommandations</button>
+        <button class="btn btn-outline" onclick="resetQuestionnaire()">Recommencer</button>
+      </div>
+    </div>
+
+    <button class="btn btn-outline" onclick="skipFace()" style="margin-top:4px">Passer cette étape</button>
   </div>
 </section>
 
@@ -2295,7 +2447,6 @@ function restart(){
   C.genre = '';
   C.type = '';
   C.faceMetrics = {};
-  document.querySelectorAll('.face-card').forEach(function(c){ c.classList.remove('on'); });
   document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
   document.querySelectorAll('.brand-chip').forEach(function(c){ c.classList.remove('on'); });
   document.querySelectorAll('.opt-card').forEach(function(c){ c.classList.remove('on'); });
@@ -2305,24 +2456,22 @@ function restart(){
   document.getElementById('budgetRange').value = 300;
   document.getElementById('budgetVal').textContent = '300 €';
   document.getElementById('s3Next').disabled = true;
-  document.getElementById('manualNext').disabled = true;
   document.getElementById('camNext').disabled = true;
+  resetQuestionnaire();
   goTo(1);
 }
 
 /* ═════════ FACE SCREEN INIT ═════════ */
 function initFaceScreen(){
-  buildFaceGrid();
+  resetQuestionnaire();
 
   if(IS_INAPP){
-    // Instagram/Facebook in-app — camera blocked, show manual picker only
     document.getElementById('camView').style.display = 'none';
     document.getElementById('igWarning').style.display = 'block';
     document.getElementById('manualView').style.display = 'block';
     return;
   }
 
-  // Real browser — try camera
   document.getElementById('camView').style.display = 'block';
   document.getElementById('manualView').style.display = 'none';
   document.getElementById('igWarning').style.display = 'none';
@@ -2333,27 +2482,7 @@ function showManual(){
   stopCamera();
   document.getElementById('camView').style.display = 'none';
   document.getElementById('manualView').style.display = 'block';
-}
-
-function buildFaceGrid(){
-  const grid = document.getElementById('faceGrid');
-  if(grid.children.length > 0) return; // already built
-  let html = '';
-  FACE_SHAPES.forEach(function(f){
-    html += '<div class="face-card" data-id="' + f.id + '" onclick="pickFace(this)">' +
-            f.svg +
-            '<div class="fc-name">' + f.name + '</div>' +
-            '<div class="fc-desc">' + f.desc + '</div>' +
-            '</div>';
-  });
-  grid.innerHTML = html;
-}
-
-function pickFace(el){
-  document.querySelectorAll('.face-card').forEach(function(c){ c.classList.remove('on'); });
-  el.classList.add('on');
-  C.faceShape = el.dataset.id;
-  document.getElementById('manualNext').disabled = false;
+  resetQuestionnaire();
 }
 
 function skipFace(){
@@ -2364,6 +2493,111 @@ function skipFace(){
 function confirmFace(){
   stopCamera();
   goTo(3);
+}
+
+/* ═════════ QUESTIONNAIRE ═════════ */
+var qAnswers = {};
+
+function resetQuestionnaire(){
+  qAnswers = {};
+  document.querySelectorAll('.q-btn').forEach(function(b){ b.classList.remove('on'); });
+  document.querySelectorAll('.q-block').forEach(function(b){ b.classList.remove('active'); });
+  var qb1 = document.getElementById('qBlock1');
+  if(qb1) qb1.classList.add('active');
+  document.querySelectorAll('.q-dot').forEach(function(d){ d.classList.remove('active','done'); });
+  var qd1 = document.getElementById('qd1');
+  if(qd1) qd1.classList.add('active');
+  var qv = document.getElementById('questionnaireView');
+  if(qv) qv.style.display = 'block';
+  var qrp = document.getElementById('qResultPanel');
+  if(qrp) qrp.classList.remove('show');
+}
+
+function selectQ(btn){
+  var q = parseInt(btn.dataset.q);
+  var v = btn.dataset.v;
+  btn.closest('.q-options').querySelectorAll('.q-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  qAnswers[q] = v;
+  var dot = document.getElementById('qd' + q);
+  if(dot){ dot.classList.remove('active'); dot.classList.add('done'); }
+  setTimeout(function(){ advanceQuestionnaire(q, v); }, 380);
+}
+
+function advanceQuestionnaire(q, v){
+  var q1 = qAnswers[1], q2 = qAnswers[2];
+  if(q === 1){
+    document.getElementById('qBlock1').classList.remove('active');
+    document.getElementById('qBlock2').classList.add('active');
+    var d2 = document.getElementById('qd2'); if(d2) d2.classList.add('active');
+    return;
+  }
+  if(q === 2){
+    if(q1 === 'a' && (v === 'a' || v === 'c')){
+      document.getElementById('qBlock2').classList.remove('active');
+      document.getElementById('qBlock3').classList.add('active');
+      var d3 = document.getElementById('qd3'); if(d3) d3.classList.add('active');
+      return;
+    }
+    computeShapeFromQuestionnaire();
+    return;
+  }
+  if(q === 3){ computeShapeFromQuestionnaire(); }
+}
+
+function computeShapeFromQuestionnaire(){
+  var q1 = qAnswers[1], q2 = qAnswers[2], q3 = qAnswers[3];
+  var shape;
+  if(q1 === 'b'){
+    shape = (q2 === 'b') ? 'rectangle' : 'ovale';
+  } else {
+    if(q2 === 'b'){
+      shape = 'carre';
+    } else {
+      if(q3 === 'a')      shape = 'coeur';
+      else if(q3 === 'b') shape = 'triangle';
+      else                shape = 'rond';
+    }
+  }
+  C.faceShape = shape;
+  showQResult(shape);
+}
+
+var SHAPE_LABELS = {ovale:'Ovale',rond:'Rond',carre:'Carré',rectangle:'Rectangle',coeur:'Cœur',triangle:'Triangle'};
+var SHAPE_DESCS  = {
+  ovale:     'Visage aux proportions harmonieuses, légèrement plus long que large — la morphologie la plus polyvalente.',
+  rond:      'Largeur et hauteur proches, contours arrondis et doux. La légèreté et les angles sont vos meilleurs alliés.',
+  carre:     'Mâchoire affirmée, front large : une structure forte et définie. Les courbes l\'adoucissent avec caractère.',
+  rectangle: 'Visage allongé à la structure angulaire. L\'horizontalité et les largeurs vont recentrer votre regard.',
+  coeur:     'Front large et menton fin en V — une morphologie très distinctive. Les montures rééquilibrent le bas du visage.',
+  triangle:  'Mâchoire plus large que le front : une base solide. Les montures à fort volume en haut rééquilibrent l\'ensemble.'
+};
+
+function showQResult(shape){
+  document.getElementById('questionnaireView').style.display = 'none';
+  document.getElementById('qrShape').textContent = SHAPE_LABELS[shape] || shape;
+  document.getElementById('qrDesc').textContent  = SHAPE_DESCS[shape]  || '';
+  document.getElementById('qResultPanel').classList.add('show');
+}
+
+/* ═════════ SCAN CONFIRM PANEL ═════════ */
+function showScanConfirmPanel(shape){
+  document.getElementById('scShape').textContent = SHAPE_LABELS[shape] || shape;
+  document.getElementById('scDesc').textContent  = SHAPE_DESCS[shape]  || '';
+  document.getElementById('scanConfirm').classList.add('show');
+}
+
+function confirmFaceScan(){
+  stopCamera();
+  goTo(3);
+}
+
+function adjustFaceScan(){
+  document.getElementById('scanConfirm').classList.remove('show');
+  document.getElementById('camView').style.display = 'none';
+  document.getElementById('manualView').style.display = 'block';
+  resetQuestionnaire();
+  stopCamera();
 }
 
 /* ═════════ CAMERA + FACE-API ═════════ */
@@ -2640,7 +2874,7 @@ function runAnalysisSequence(shape){
       setTimeout(function(){
         overlay.classList.remove('show');
         setStatus('found', '✓ Forme détectée : visage ' + shapeName.toLowerCase());
-        document.getElementById('camNext').disabled = false;
+        showScanConfirmPanel(shape);
       }, 900);
     }
   }
@@ -2911,7 +3145,6 @@ function renderResults(recos){
 }
 
 /* ═════════ INIT ═════════ */
-buildFaceGrid();
 buildBrandGrid();
 
 // Pre-load face-api models in background (only on real browser, not in-app)
